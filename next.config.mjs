@@ -9,9 +9,6 @@ const nextConfig = {
     ],
   },
   
-  // Optimize package imports
-  optimizePackageImports: ['lucide-react', 'date-fns', 'recharts'],
-  
   // Security headers
   async headers() {
     return [
