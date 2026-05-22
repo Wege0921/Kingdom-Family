@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 
 const PLATFORMS = ['facebook', 'instagram', 'twitter', 'telegram', 'tiktok'] as const
@@ -53,6 +53,7 @@ export function SocialPostForm({
   const router = useRouter()
   const { toast } = useToast()
   const [saving, setSaving] = useState(false)
+  const [generating, setGenerating] = useState(false)
 
   const form = useForm<SocialPostFormValues>({
     resolver: zodResolver(socialPostSchema),
@@ -117,6 +118,53 @@ export function SocialPostForm({
       })
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleGenerateCaption = async () => {
+    const sermonId = form.getValues('sermon_id')
+    const platform = form.getValues('platform')
+
+    if (!sermonId) {
+      toast({
+        title: 'Select a sermon first',
+        description: 'Please select a sermon before generating a caption.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    setGenerating(true)
+    try {
+      const response = await fetch('/api/ai/caption', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sermonId, platform }),
+      })
+
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate caption')
+      }
+
+      if (data.captions) {
+        if (data.captions.caption_en) {
+          form.setValue('caption_en', data.captions.caption_en)
+        }
+        if (data.captions.caption_am) {
+          form.setValue('caption_am', data.captions.caption_am)
+        }
+        toast({ title: 'Captions generated', description: 'AI-generated captions have been applied.' })
+      }
+    } catch (error) {
+      toast({
+        title: 'Generation failed',
+        description: error instanceof Error ? error.message : 'Failed to generate caption',
+        variant: 'destructive',
+      })
+    } finally {
+      setGenerating(false)
     }
   }
 
@@ -230,10 +278,26 @@ export function SocialPostForm({
         </Card>
 
         <Tabs defaultValue="en">
-          <TabsList>
-            <TabsTrigger value="en">Caption (EN)</TabsTrigger>
-            <TabsTrigger value="am">Caption (AM)</TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between mb-2">
+            <TabsList>
+              <TabsTrigger value="en">Caption (EN)</TabsTrigger>
+              <TabsTrigger value="am">Caption (AM)</TabsTrigger>
+            </TabsList>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateCaption}
+              disabled={generating || !form.getValues('sermon_id')}
+            >
+              {generating ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-4 w-4" />
+              )}
+              Generate with AI
+            </Button>
+          </div>
           <TabsContent value="en" className="mt-4">
             <FormField
               control={form.control}

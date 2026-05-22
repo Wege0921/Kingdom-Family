@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import type { Quiz } from '@/lib/types'
+import confetti from 'canvas-confetti'
 
 interface ModuleQuizProps {
   moduleId: string
@@ -34,6 +35,37 @@ export function ModuleQuiz({ moduleId, pathId, quizzes, nextModuleId }: ModuleQu
     ? answers.reduce((acc, a, i) => (a === quizzes[i].correct_index ? acc + 1 : acc), 0)
     : 0
   const passed = submitted && score >= Math.ceil(quizzes.length * 0.6)
+
+  // Trigger confetti animation when quiz is passed
+  useEffect(() => {
+    if (passed) {
+      const duration = 3000
+      const end = Date.now() + duration
+
+      const frame = () => {
+        confetti({
+          particleCount: 3,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.7 },
+          colors: ['#8B6914', '#d4b85a', '#faf5eb'],
+        })
+        confetti({
+          particleCount: 3,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.7 },
+          colors: ['#8B6914', '#d4b85a', '#faf5eb'],
+        })
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame)
+        }
+      }
+
+      frame()
+    }
+  }, [passed])
 
   const submitAll = async () => {
     if (answers.length < quizzes.length || answers.some((a) => a === undefined)) {
