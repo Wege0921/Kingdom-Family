@@ -7,13 +7,14 @@ import { VideoPlayer } from '@/components/sermon/video-player'
 import { BookmarkToggle } from '@/components/sermon/bookmark-toggle'
 import { SermonComments } from '@/components/sermon/comments'
 import { ReadingProgressTracker } from '@/components/sermon/reading-progress-tracker'
+import { ShareButtons } from '@/components/sermon/share-buttons'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import type { Sermon, ScriptureReference } from '@/lib/types'
 import { format } from 'date-fns'
-import { BookOpen, Calendar, Download, ExternalLink, MessageCircle, Send } from 'lucide-react'
+import { BookOpen, Calendar, Download, ExternalLink } from 'lucide-react'
 import { SafeHTML } from '@/components/ui/safe-html'
 
 interface PageProps {
@@ -133,8 +134,6 @@ export default async function SermonDetailPage({ params }: PageProps) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
   const pageUrl = appUrl ? `${appUrl.replace(/\/$/, '')}/sermons/${id}` : `/sermons/${id}`
-  const shareTitle = encodeURIComponent(s.title_en)
-  const shareUrl = encodeURIComponent(pageUrl.startsWith('http') ? pageUrl : `https://example.com${pageUrl}`)
 
   const summaryHtml = s.summary_en ?? ''
 
@@ -197,22 +196,10 @@ export default async function SermonDetailPage({ params }: PageProps) {
                 </a>
               </Button>
             )}
-            <Button variant="outline" size="sm" asChild>
-              <a href={`https://wa.me/?text=${shareTitle}%20${shareUrl}`} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                WhatsApp
-              </a>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <a
-                href={`https://t.me/share/url?url=${shareUrl}&text=${shareTitle}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Send className="mr-2 h-4 w-4" />
-                Telegram
-              </a>
-            </Button>
+            <ShareButtons 
+              url={pageUrl.startsWith('http') ? pageUrl : `https://kingdom-learning.vercel.app${pageUrl}`} 
+              title={s.title_en} 
+            />
           </div>
         </div>
 

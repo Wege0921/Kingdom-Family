@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Noto_Sans_Ethiopic } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Toaster } from '@/components/ui/toaster'
+import { ServiceWorkerRegistration } from '@/components/pwa/ServiceWorkerRegistration'
+import { InstallBanner } from '@/components/pwa/InstallBanner'
+import { UpdateBanner } from '@/components/pwa/UpdateBanner'
 import './globals.css'
 
 const geistSans = Geist({ 
@@ -12,6 +16,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({ 
   subsets: ['latin'],
   variable: '--font-geist-mono',
+})
+
+const notoSansEthiopic = Noto_Sans_Ethiopic({
+  subsets: ['ethiopic'],
+  variable: '--font-ethiopic',
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -59,11 +69,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${notoSansEthiopic.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased bg-background">
+        <ServiceWorkerRegistration />
+        <UpdateBanner />
         {children}
+        <InstallBanner />
         <Toaster />
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { SermonCard } from './sermon-card'
+import { SermonCardSkeleton } from './sermon-card-skeleton'
 import { Loader2 } from 'lucide-react'
 import type { Sermon } from '@/lib/types'
 
@@ -132,7 +133,13 @@ export function InfiniteScrollSermons({
 
       {hasMore && (
         <div ref={observerRef} className="flex justify-center py-8">
-          {loading && <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />}
+          {loading && (
+            <div className="w-full grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <SermonCardSkeleton />
+              <SermonCardSkeleton />
+              <SermonCardSkeleton />
+            </div>
+          )}
         </div>
       )}
     </>
